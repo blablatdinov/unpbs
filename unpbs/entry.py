@@ -5,8 +5,8 @@ import libcst
 
 def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
     """Find function calls within a module AST."""
-    function_calls = {}
-    defined_functions = set()
+    function_calls: dict[str, set[str]] = {}
+    defined_functions: set[str] = set()
 
     class FunctionCollector(libcst.CSTVisitor):
         def visit_FunctionDef(self, node: libcst.FunctionDef) -> bool:  # noqa: N802
@@ -18,8 +18,8 @@ def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
 
     class FunctionCallVisitor(libcst.CSTVisitor):
         def __init__(self) -> None:
-            self.current_function = None
-            self.calls = set()
+            self.current_function: str | None = None
+            self.calls: set[str] = set()
 
         def visit_FunctionDef(self, node: libcst.FunctionDef) -> bool:  # noqa: N802
             self.current_function = node.name.value
@@ -33,10 +33,7 @@ def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
                 self.calls = set()
 
         def visit_Call(self, node: libcst.Call) -> bool:  # noqa: N802
-            if (
-                self.current_function and isinstance(node.func, libcst.Name)
-                and node.func.value in defined_functions
-            ):
+            if self.current_function and isinstance(node.func, libcst.Name) and node.func.value in defined_functions:
                 self.calls.add(node.func.value)
             return True
 
@@ -46,9 +43,10 @@ def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
 
 
 def calculate_fanin_fanout(function_calls: dict[str, set[str]]) -> dict[str, dict[str, int]]:
+    """Calculate fan-in and fan-out metrics for functions."""
     results = {}
-    for func_name in function_calls:
-        results[func_name] = {"fan_in": 0, "fan_out": len(function_calls[func_name])}
+    for func_name, calls in function_calls.items():
+        results[func_name] = {"fan_in": 0, "fan_out": len(calls)}
     for called_functions in function_calls.values():
         for called_func in called_functions:
             if called_func in results:
@@ -56,7 +54,8 @@ def calculate_fanin_fanout(function_calls: dict[str, set[str]]) -> dict[str, dic
     return results
 
 
-def logic(file_content: str):
+def logic(file_content: str) -> str:
+    """Analyze coupling metrics for given file content."""
     tree = libcst.parse_module(file_content)
     function_calls = find_function_calls(tree)
     results = calculate_fanin_fanout(function_calls)
@@ -69,6 +68,8 @@ def logic(file_content: str):
 
 
 def main() -> None:
-    # TODO #1:30min replace `file.py` with file name from args
-    # TODO #1:30min try/except for all cases
-    pass
+    """Main entry point for the application.
+
+    TODO #1:30min replace `file.py` with file name from args
+    TODO #1:30min try/except for all cases
+    """
