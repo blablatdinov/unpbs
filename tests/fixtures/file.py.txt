@@ -6,4 +6,4 @@ def bar():
 # FanIn = 0
 # FanOut = 1
 def foo():
-	bar()
+    bar()
