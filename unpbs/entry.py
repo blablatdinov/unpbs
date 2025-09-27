@@ -6,6 +6,16 @@ from typing import Dict, Set, List
 
 def find_function_calls(tree: libcst.Module) -> Dict[str, Set[str]]:
     function_calls = {}
+    defined_functions = set()
+
+    # Сначала собираем все определенные функции
+    class FunctionCollector(libcst.CSTVisitor):
+        def visit_FunctionDef(self, node: libcst.FunctionDef) -> bool:
+            defined_functions.add(node.name.value)
+            return True
+
+    collector = FunctionCollector()
+    tree.visit(collector)
 
     class FunctionCallVisitor(libcst.CSTVisitor):
         def __init__(self):
@@ -25,7 +35,9 @@ def find_function_calls(tree: libcst.Module) -> Dict[str, Set[str]]:
         
         def visit_Call(self, node: libcst.Call) -> bool:
             if self.current_function and isinstance(node.func, libcst.Name):
-                self.calls.add(node.func.value)
+                # Учитываем только вызовы функций, определенных в том же файле
+                if node.func.value in defined_functions:
+                    self.calls.add(node.func.value)
             return True
 
     visitor = FunctionCallVisitor()
