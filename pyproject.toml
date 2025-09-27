@@ -19,6 +19,7 @@ packages = [{include = "unpbs"}]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "8.4.2"
+ruff = "^0.13.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
