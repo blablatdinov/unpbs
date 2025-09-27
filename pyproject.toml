@@ -6,7 +6,7 @@ authors = [
     {name = "Almaz Ilaletdinov",email = "a.ilaletdinov@yandex.ru"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9,<4.0"
 dependencies = [
     "libcst (>=1.8.5,<2.0.0)"
 ]
@@ -22,6 +22,7 @@ pytest = "8.4.2"
 ruff = "0.13.2"
 pytest-cov = "7.0.0"
 mypy = "1.18.2"
+deltaver = "^0.2.3"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
