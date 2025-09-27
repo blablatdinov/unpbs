@@ -22,10 +22,12 @@ def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
         def __init__(self) -> None:
             self.current_function: str | None = None
             self.calls: set[str] = set()
+            self.in_function_def = False
 
         def visit_FunctionDef(self, node: libcst.FunctionDef) -> bool:  # noqa: N802
             self.current_function = node.name.value
             self.calls = set()
+            self.in_function_def = True
             return True
 
         def leave_FunctionDef(self, node: libcst.FunctionDef) -> None:  # noqa: N802
@@ -33,10 +35,29 @@ def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
                 function_calls[self.current_function] = self.calls.copy()
                 self.current_function = None
                 self.calls = set()
+            self.in_function_def = False
+        
+        def visit_FunctionDef_body(self, node: libcst.FunctionDef) -> None:  # noqa: N802
+            # Когда входим в тело функции, сбрасываем флаг
+            self.in_function_def = False
 
         def visit_Call(self, node: libcst.Call) -> bool:  # noqa: N802
-            if self.current_function and isinstance(node.func, libcst.Name) and node.func.value in defined_functions:
-                self.calls.add(node.func.value)
+            if self.current_function:
+                # Учитываем вызовы функций, определенных в модуле
+                if isinstance(node.func, libcst.Name) and node.func.value in defined_functions:
+                    self.calls.add(node.func.value)
+                # Учитываем вызовы методов объектов (например, httpx.get)
+                elif isinstance(node.func, libcst.Attribute):
+                    # Добавляем имя метода как вызов
+                    self.calls.add(node.func.attr.value)
+            return True
+        
+        def visit_Name(self, node: libcst.Name) -> bool:
+            # Учитываем простые ссылки на функции (без вызова), но не в определениях функций
+            if (self.current_function and 
+                not self.in_function_def and 
+                node.value in defined_functions):
+                self.calls.add(node.value)
             return True
 
     visitor = FunctionCallVisitor()
@@ -56,17 +77,11 @@ def calculate_fanin_fanout(function_calls: dict[str, set[str]]) -> dict[str, dic
     return results
 
 
-def logic(file_content: str) -> str:
+def logic(file_content: str) -> dict[str, dict[str, int]]:
     """Analyze coupling metrics for given file content."""
     tree = libcst.parse_module(file_content)
     function_calls = find_function_calls(tree)
-    results = calculate_fanin_fanout(function_calls)
-    output = []
-    for func_name, metrics in results.items():
-        output.append(f"{func_name}")
-        output.append(f"  fan_in: {metrics['fan_in']}")
-        output.append(f"  fan_out: {metrics['fan_out']}")
-    return "\n".join(output)
+    return calculate_fanin_fanout(function_calls)
 
 
 def main() -> None:

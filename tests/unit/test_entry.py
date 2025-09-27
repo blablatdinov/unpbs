@@ -13,16 +13,7 @@ def test_logic() -> None:
             "    bar()",
         ],
     )
-    assert logic(file_content) == "\n".join(
-        [
-            "bar",
-            "  fan_in: 1",
-            "  fan_out: 0",
-            "foo",
-            "  fan_in: 0",
-            "  fan_out: 1",
-        ],
-    )
+    assert logic(file_content) == {"bar": {"fan_in": 1, "fan_out": 0}, "foo": {"fan_in": 0, "fan_out": 1}}
 
 
 def test_import() -> None:
@@ -34,10 +25,38 @@ def test_import() -> None:
             '    httpx.get("https://example.com")',
         ],
     )
-    assert logic(file_content) == "\n".join(
+    assert logic(file_content) == {"bar": {"fan_in": 0, "fan_out": 1}}
+
+
+def test_function() -> None:
+    file_content = "\n".join(
         [
-            "bar",
-            "  fan_in: 0",
-            "  fan_out: 0",
+            "def foo():",
+            "    pass",
+            "def bar():",
+            "    foo()",
+            "    baz()",
+            "def baz():",
+            "    bizz()",
+            "def bizz():",
+            "    pass",
         ],
     )
+    assert logic(file_content) == {
+        "foo": {"fan_in": 1, "fan_out": 0},
+        "bar": {"fan_in": 0, "fan_out": 2},
+        "baz": {"fan_in": 1, "fan_out": 1},
+        "bizz": {"fan_in": 1, "fan_out": 0},
+    }
+
+
+def test_without_call() -> None:
+    file_content = "\n".join(
+        [
+            "def foo():",
+            "    pass",
+            "def bar():",
+            "    foo",
+        ],
+    )
+    assert logic(file_content) == {"foo": {"fan_in": 1, "fan_out": 0}, "bar": {"fan_in": 0, "fan_out": 1}}
