@@ -1,0 +1,24 @@
+[project]
+name = "coupling-analyzer"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Almaz Ilaletdinov",email = "a.ilaletdinov@yandex.ru"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+]
+
+[project.scripts]
+unpbs = "unpbs.entry:main"
+
+[tool.poetry]
+packages = [{include = "unpbs"}]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "8.4.2"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

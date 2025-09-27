@@ -1,0 +1,9 @@
+# FanIn = 1
+# FanOut = 0
+def bar():
+    return 0
+
+# FanIn = 0
+# FanOut = 1
+def foo():
+	bar()
