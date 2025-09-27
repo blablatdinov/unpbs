@@ -951,4 +951,4 @@ pygments = ">=2.19,<3.0"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "20fae13b7c3110abfaad28c7470c70e22c919ab5acdc7c94890139f64bc95959"
+content-hash = "4c8cb40ebfa4756b6d2dc5d42fc614e09f180021a608034ea43548004117792d"
