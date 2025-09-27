@@ -16,6 +16,37 @@ def test_logic() -> None:
     assert logic(file_content) == {"bar": {"fan_in": 1, "fan_out": 0}, "foo": {"fan_in": 0, "fan_out": 1}}
 
 
+def test_double_usage() -> None:
+    file_content = "\n".join(
+        [
+            "def bar():",
+            "    return 0",
+            "def foo():",
+            "    bar() + bar()",
+        ],
+    )
+    assert logic(file_content) == {"bar": {"fan_in": 1, "fan_out": 0}, "foo": {"fan_in": 0, "fan_out": 1.7}}
+
+
+def test_combine_usage() -> None:
+    file_content = "\n".join(
+        [
+            "def bar():",
+            "    return 0",
+            "def baz():",
+            "    return 0",
+            "def foo():",
+            "    baz()",
+            "    bar() + bar()",
+        ],
+    )
+    assert logic(file_content) == {
+        "bar": {"fan_in": 1, "fan_out": 0},
+        "baz": {"fan_in": 1, "fan_out": 0},
+        "foo": {"fan_in": 0, "fan_out": 2.7},
+    }
+
+
 def test_import() -> None:
     """Test the logic function with import statements."""
     file_content = "\n".join(
