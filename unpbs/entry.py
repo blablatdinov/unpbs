@@ -1,7 +1,8 @@
 """Entry point module for coupling analyzer."""
 
-import libcst
 from pathlib import Path
+
+import libcst
 
 
 def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
@@ -72,4 +73,4 @@ def main() -> None:
     """Main entry point for the application."""
     # TODO #1:30min replace `file.py` with file name from args
     # TODO #1:30min try/except for all cases
-    print(logic(Path("file.py").read_text()))
+    print(logic(Path("file.py").read_text()))  # noqa: T201
