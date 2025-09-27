@@ -38,22 +38,17 @@ def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:  # noqa: C9
             self.in_function_def = False
 
         def visit_FunctionDef_body(self, node: libcst.FunctionDef) -> None:  # noqa: N802
-            # Когда входим в тело функции, сбрасываем флаг
             self.in_function_def = False
 
         def visit_Call(self, node: libcst.Call) -> bool:  # noqa: N802
             if self.current_function:
-                # Учитываем вызовы функций, определенных в модуле
                 if isinstance(node.func, libcst.Name) and node.func.value in defined_functions:
                     self.calls.add(node.func.value)
-                # Учитываем вызовы методов объектов (например, httpx.get)
                 elif isinstance(node.func, libcst.Attribute):
-                    # Добавляем имя метода как вызов
                     self.calls.add(node.func.attr.value)
             return True
 
         def visit_name(self, node: libcst.Name) -> bool:  # noqa: N802
-            # Учитываем простые ссылки на функции (без вызова), но не в определениях функций
             if self.current_function and not self.in_function_def and node.value in defined_functions:
                 self.calls.add(node.value)
             return True
