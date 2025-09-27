@@ -1,9 +1,62 @@
+import libcst
+from pathlib import Path
+from typing import Dict, Set, List
+
+
+
+def find_function_calls(tree: libcst.Module) -> Dict[str, Set[str]]:
+    function_calls = {}
+
+    class FunctionCallVisitor(libcst.CSTVisitor):
+        def __init__(self):
+            self.current_function = None
+            self.calls = set()
+        
+        def visit_FunctionDef(self, node: libcst.FunctionDef) -> bool:
+            self.current_function = node.name.value
+            self.calls = set()
+            return True
+        
+        def leave_FunctionDef(self, node: libcst.FunctionDef) -> None:
+            if self.current_function:
+                function_calls[self.current_function] = self.calls.copy()
+                self.current_function = None
+                self.calls = set()
+        
+        def visit_Call(self, node: libcst.Call) -> bool:
+            if self.current_function and isinstance(node.func, libcst.Name):
+                self.calls.add(node.func.value)
+            return True
+
+    visitor = FunctionCallVisitor()
+    tree.visit(visitor)
+    return function_calls
+
+
+def calculate_fanin_fanout(function_calls: Dict[str, Set[str]]) -> Dict[str, Dict[str, int]]:
+    results = {}
+    for func_name in function_calls:
+        results[func_name] = {"fan_in": 0, "fan_out": len(function_calls[func_name])}
+    for caller, called_functions in function_calls.items():
+        for called_func in called_functions:
+            if called_func in results:
+                results[called_func]["fan_in"] += 1
+    return results
+
+
+def logic(file_content: str):
+    tree = libcst.parse_module(file_content)
+    function_calls = find_function_calls(tree)
+    results = calculate_fanin_fanout(function_calls)
+    output = []
+    for func_name, metrics in results.items():
+        output.append(f"{func_name}")
+        output.append(f"  fan_in: {metrics['fan_in']}")
+        output.append(f"  fan_out: {metrics['fan_out']}")
+    return '\n'.join(output)
+
+
 def main():
-    print('\n'.join([
-        'bar',
-        '  fan_in: 1',
-        '  fan_out: 0',
-        'foo',
-        '  fan_in: 0',
-        '  fan_out: 1',
-    ]))
+    # TODO #1:30min replace `file.py` with file name from args
+    # TODO #1:30min try/except for all cases
+    print(logic(Path('file.py').read_text()))
