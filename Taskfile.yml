@@ -73,11 +73,14 @@ tasks:
   fmt:
     desc: "Run formatters"
     cmds:
-      - poetry run ruff check unpbs tests --fix --fix-only
+      - poetry run ruff format
+      - poetry run ruff check --fix --unsafe-fixes
 
   lint:
     desc: "Run linters"
     cmds:
+      - poetry run ruff format --check
+      - poetry run ruff check unpbs tests
       - poetry run ruff check unpbs tests
       - poetry run flake8 unpbs tests
       - poetry run mypy unpbs tests --strict

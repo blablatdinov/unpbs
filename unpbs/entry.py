@@ -1,16 +1,15 @@
+"""Entry point module for coupling analyzer."""
+
 import libcst
-from pathlib import Path
-from typing import Dict, Set, List
 
 
-
-def find_function_calls(tree: libcst.Module) -> Dict[str, Set[str]]:
+def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
+    """Find function calls within a module AST."""
     function_calls = {}
     defined_functions = set()
 
-    # Сначала собираем все определенные функции
     class FunctionCollector(libcst.CSTVisitor):
-        def visit_FunctionDef(self, node: libcst.FunctionDef) -> bool:
+        def visit_FunctionDef(self, node: libcst.FunctionDef) -> bool:  # noqa: N802
             defined_functions.add(node.name.value)
             return True
 
@@ -18,26 +17,27 @@ def find_function_calls(tree: libcst.Module) -> Dict[str, Set[str]]:
     tree.visit(collector)
 
     class FunctionCallVisitor(libcst.CSTVisitor):
-        def __init__(self):
+        def __init__(self) -> None:
             self.current_function = None
             self.calls = set()
-        
-        def visit_FunctionDef(self, node: libcst.FunctionDef) -> bool:
+
+        def visit_FunctionDef(self, node: libcst.FunctionDef) -> bool:  # noqa: N802
             self.current_function = node.name.value
             self.calls = set()
             return True
-        
-        def leave_FunctionDef(self, node: libcst.FunctionDef) -> None:
+
+        def leave_FunctionDef(self, node: libcst.FunctionDef) -> None:  # noqa: N802
             if self.current_function:
                 function_calls[self.current_function] = self.calls.copy()
                 self.current_function = None
                 self.calls = set()
-        
-        def visit_Call(self, node: libcst.Call) -> bool:
-            if self.current_function and isinstance(node.func, libcst.Name):
-                # Учитываем только вызовы функций, определенных в том же файле
-                if node.func.value in defined_functions:
-                    self.calls.add(node.func.value)
+
+        def visit_Call(self, node: libcst.Call) -> bool:  # noqa: N802
+            if (
+                self.current_function and isinstance(node.func, libcst.Name)
+                and node.func.value in defined_functions
+            ):
+                self.calls.add(node.func.value)
             return True
 
     visitor = FunctionCallVisitor()
@@ -45,11 +45,11 @@ def find_function_calls(tree: libcst.Module) -> Dict[str, Set[str]]:
     return function_calls
 
 
-def calculate_fanin_fanout(function_calls: Dict[str, Set[str]]) -> Dict[str, Dict[str, int]]:
+def calculate_fanin_fanout(function_calls: dict[str, set[str]]) -> dict[str, dict[str, int]]:
     results = {}
     for func_name in function_calls:
         results[func_name] = {"fan_in": 0, "fan_out": len(function_calls[func_name])}
-    for caller, called_functions in function_calls.items():
+    for called_functions in function_calls.values():
         for called_func in called_functions:
             if called_func in results:
                 results[called_func]["fan_in"] += 1
@@ -65,10 +65,10 @@ def logic(file_content: str):
         output.append(f"{func_name}")
         output.append(f"  fan_in: {metrics['fan_in']}")
         output.append(f"  fan_out: {metrics['fan_out']}")
-    return '\n'.join(output)
+    return "\n".join(output)
 
 
-def main():
+def main() -> None:
     # TODO #1:30min replace `file.py` with file name from args
     # TODO #1:30min try/except for all cases
-    print(logic(Path('file.py').read_text()))
+    pass
