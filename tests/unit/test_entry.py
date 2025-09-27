@@ -29,6 +29,7 @@ def test_import() -> None:
 
 
 def test_function() -> None:
+    """Test the logic function with multiple function calls."""
     file_content = "\n".join(
         [
             "def foo():",
@@ -51,6 +52,7 @@ def test_function() -> None:
 
 
 def test_without_call() -> None:
+    """Test the logic function with function references without calls."""
     file_content = "\n".join(
         [
             "def foo():",

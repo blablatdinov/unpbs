@@ -5,7 +5,7 @@ from pathlib import Path
 import libcst
 
 
-def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
+def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:  # noqa: C901
     """Find function calls within a module AST."""
     function_calls: dict[str, set[str]] = {}
     defined_functions: set[str] = set()
@@ -36,7 +36,7 @@ def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
                 self.current_function = None
                 self.calls = set()
             self.in_function_def = False
-        
+
         def visit_FunctionDef_body(self, node: libcst.FunctionDef) -> None:  # noqa: N802
             # Когда входим в тело функции, сбрасываем флаг
             self.in_function_def = False
@@ -51,12 +51,10 @@ def find_function_calls(tree: libcst.Module) -> dict[str, set[str]]:
                     # Добавляем имя метода как вызов
                     self.calls.add(node.func.attr.value)
             return True
-        
-        def visit_Name(self, node: libcst.Name) -> bool:
+
+        def visit_name(self, node: libcst.Name) -> bool:  # noqa: N802
             # Учитываем простые ссылки на функции (без вызова), но не в определениях функций
-            if (self.current_function and 
-                not self.in_function_def and 
-                node.value in defined_functions):
+            if self.current_function and not self.in_function_def and node.value in defined_functions:
                 self.calls.add(node.value)
             return True
 
