@@ -145,5 +145,5 @@ jobs:
           VERSION="0.0.3"
           curl -O -L -C - https://github.com/blablatdinov/gotemir/releases/download/$VERSION/gotemir-linux-amd64.tar
           tar xzf gotemir-linux-amd64.tar
-          ./gotemir-linux-amd64 --ext .py ondivi tests/unit
+          ./gotemir-linux-amd64 --ext .py unpbs tests/unit
         shell: bash
