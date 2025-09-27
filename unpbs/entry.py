@@ -22,7 +22,7 @@ class FunctionUsages(libcst.CSTVisitor):
         self.usages: dict[str, set[str]] = defaultdict(set)
 
     def rec_visit(self, node):
-        print(node, '\n=====================')
+        # print(node, '\n=====================')
         if isinstance(node, tuple):
             for elem in node:
                 self.rec_visit(elem)
@@ -35,7 +35,8 @@ class FunctionUsages(libcst.CSTVisitor):
         if isinstance(node, libcst.Call):
             self.rec_visit(node.func)
         if isinstance(node, libcst.Attribute):
-            self.usages[self.analyze_fn].add(node.value.value + '.' + node.attr.value)
+            # self.usages[self.analyze_fn].add(node.value.value + '.' + node.attr.value)
+            self.usages[node.value.value + '.' + node.attr.value].add(self.analyze_fn)
 
     def visit_FunctionDef(self, node: libcst.FunctionDef):
         self.current_function = node.name.value
@@ -54,13 +55,13 @@ def logic(content: str):
     for fn in fn_cltr.functions:
         fn_usages = FunctionUsages(fn.name.value)
         tree.visit(fn_usages)
-        print(fn_usages.usages)
         for func, usages in fn_usages.usages.items():
             for usg in usages:
                 if not result.get(usg):
                     continue
                 result[usg]['fan_out'] += 1
-            result[func]['fan_in'] = len(usages)
+            if result.get(func):
+                result[func]['fan_in'] = len(usages)
     return result
 
 
