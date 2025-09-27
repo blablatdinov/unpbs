@@ -81,7 +81,7 @@ tasks:
     cmds:
       - poetry run ruff format --check
       - poetry run ruff check unpbs tests
-      - poetry run ruff check unpbs tests
+      # TODO #4:30min WPS check
       - poetry run mypy unpbs tests --strict
 
   cspell-baseline:
