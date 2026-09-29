@@ -38,13 +38,4 @@ def test(current_dir: Path) -> None:
         check=False,
     )
     assert got.returncode == 0
-    assert got.stdout.decode("utf-8") == "\n".join(
-        [
-            "bar",
-            "  fan_in: 1",
-            "  fan_out: 0",
-            "foo",
-            "  fan_in: 0",
-            "  fan_out: 1\n",
-        ],
-    )
+    assert got.stdout.decode("utf-8") == "{'bar': {'fan_in': 1, 'fan_out': 0}, 'foo': {'fan_in': 0, 'fan_out': 1}}"

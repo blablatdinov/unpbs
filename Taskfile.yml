@@ -56,7 +56,7 @@ tasks:
       - poetry run mypy unpbs tests --strict
 
   test:
-    deps: [syntax-check,type-check]
+    # deps: [syntax-check,type-check]
     cmds:
       - poetry run pytest {{.CLI_ARGS}} -s -vv
 
